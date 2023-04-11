@@ -24,8 +24,8 @@ def Login(request):
         for a in adminaccount:
             if a.password==pw:
                 if serializer.is_valid:
-                    s = {'status': "pass",'account type':"admin"} 
-                    newserial.append(s)              
+                    newserial[0]['status']="pass"
+                    newserial[0]['account type']="admin"            
                     return JsonResponse(newserial, safe=False)
             
             else:
@@ -39,8 +39,8 @@ def Login(request):
         for e in expertaccount:
             if e.password==pw:
                 if serializer.is_valid:
-                    s = {'status': "pass",'account type':"expert"} 
-                    newserial.append(s)              
+                    newserial[0]['status']="pass"
+                    newserial[0]['account type']="expert"              
                     return JsonResponse(newserial, safe=False)
             
             else:
@@ -54,8 +54,8 @@ def Login(request):
         for p in proposeraccount:
             if p.password==pw:
                 if serializer.is_valid:
-                    s = {'status': "pass",'account type':"proposer"} 
-                    newserial.append(s)              
+                    newserial[0]['status']="pass"
+                    newserial[0]['account type']="proposer"              
                     return JsonResponse(newserial, safe=False)
             
             else:
@@ -69,8 +69,8 @@ def Login(request):
         for g in garageaccount:
             if g.password==pw:
                 if serializer.is_valid:
-                    s = {'status': "pass",'account type':"garage"} 
-                    newserial.append(s)              
+                    newserial[0]['status']="pass"
+                    newserial[0]['account type']="garage"             
                     return JsonResponse(newserial, safe=False)
             
             else:
