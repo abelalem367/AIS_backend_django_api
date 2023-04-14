@@ -9,6 +9,21 @@ def getData(request):
     serializer = ais_serializer(items, many=True)
     return JsonResponse(serializer.data,safe=False)
 
+@api_view(['POST'])
+def createVehicleInsurance(request):
+    v = Vehicle(
+                    engine_number=request.data.get('engineNumber'),chassis_number=request.data.get('chassisNumber'),
+                    owner_f_name=request.data.get('firstName'),owner_l_name=request.data.get('lastName'),
+                    purpose=request.data.get('purpose'),body_type=request.data.get('bodyType'),
+                    horse_power=request.data.get('horsePower'),good_capacity=request.data.get('goodCapacity'),
+                    passenger_capacity=request.data.get('passengerCapacity'),bsg_action=request.data.get('bsgAction'),
+                    cover_required=request.data.get('coverRequired'),drivers_covered=request.data.get('driversCovered'),
+                    expert = request.data.get('expertId'),proposer = request.data.get('proposerId')
+                )
+    v.save()
+    newserial = [{'status':"created"}] 
+    return JsonResponse(newserial,safe=False) 
+
 
 @api_view(['POST']) 
 def Login(request):
