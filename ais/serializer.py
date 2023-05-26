@@ -15,6 +15,7 @@ class expertlogin_serializer(serializers.ModelSerializer):
     class Meta:
         model = Expert
         fields = ('f_name','l_name','username','p_image','email','phone','admin_id')
+    
         
 class garagelogin_serializer(serializers.ModelSerializer):
     class Meta:
