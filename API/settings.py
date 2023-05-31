@@ -1,4 +1,5 @@
 
+from datetime import timedelta
 
 from pathlib import Path
 
@@ -43,6 +44,14 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     )
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    
 }
 CORS_ALLOWED_ORIGINS = [
     "http://192.168.43.164:3000",
