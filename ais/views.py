@@ -4,8 +4,10 @@ from . models import *
 from django.http import JsonResponse
 import bcrypt
 from django.contrib.auth.models import User
+from django.contrib.auth import login
 from rest_framework.permissions import AllowAny
 from rest_framework.decorators import authentication_classes, permission_classes
+
 
 @api_view(['GET'])
 def getData(request):
@@ -62,6 +64,7 @@ def Login(request):
         for a in adminaccount:
             if bcrypt.checkpw(pw,a.password.encode('utf-8')):
                 if serializer.is_valid:
+                    
                     newserial[0]['status']="pass"
                     newserial[0]['account type']="admin"            
                     return JsonResponse(newserial, safe=False)
@@ -161,6 +164,9 @@ def createExpertAccount(request):
                         p_image=request.data.get('p_image'),email=request.data.get('email'),phone=request.data.get('phone'),
                         password=hashed.decode('utf8'),admin_id=request.data.get('admin_id'))
         account.save()
+        u = User.objects.create_user(username=request.data.get('username'),
+                                     password=request.data.get('password'),
+                                     is_active=True,is_staff=False)
         newserial = [{'status':"created"}] 
         return JsonResponse(newserial,safe=False)
     
@@ -178,6 +184,9 @@ def createProposerAccount(request):
                         username=request.data.get('username'),p_image=request.data.get('p_image'),
                         password=hashed.decode('utf8'))
         account.save()
+        u = User.objects.create_user(username=request.data.get('username'),
+                                     password=request.data.get('password'),
+                                     is_active=True,is_staff=False)
         res_address = ResidentialAddress(account.id,subcity=request.data.get('res_subcity'),
                                             woreda='res_woreda', kebele='res_kebele', house_no='res_house_no',
                                             p_o_box='res_p_o_box', phone='res_phone', email='res_email')
