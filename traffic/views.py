@@ -3,7 +3,8 @@ from rest_framework.decorators import api_view
 from . models import *
 from rest_framework.permissions import AllowAny
 from rest_framework.decorators import authentication_classes, permission_classes
-
+import bcrypt
+from . serializer import *
 
 @api_view(['POST'])
 @authentication_classes([])
@@ -53,3 +54,29 @@ def registerAccident(request):
     return JsonResponse(newserial,safe=False) 
     #acc_images = AccidentImages()
     
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([])
+def accountcreate(request):
+    a = Admin.objects.get(id=request.data.get('admin'))
+    
+    if Client.objects.all().filter(username=request.data.get('username')):
+        newserial = [{'status':"fail",'reason':"account with the username already exists"}]
+        return JsonResponse(newserial,safe=False)
+    else:
+        hashed = bcrypt.hashpw(request.data.get('password').encode('utf8'),bcrypt.gensalt())
+        c = Client(name=request.data.get('name'),email=request.data.get('email'),username=request.data.get('username'),
+               subcity=request.data.get('subcity'),woreda=request.data.get('woreda'),housenumber=request.data.get('housenumber'),
+               kebele=request.data.get('kebele'),phone=request.data.get('phone'),public_key=request.data.get('publickey'),
+               private_key=request.data.get('privatekey'),password=hashed.decode('utf8'),isappoved=request.data.get('isapproved'),
+               admin=a)
+        newserial = [{'status':"created"}] 
+        return JsonResponse(newserial,safe=False)
+
+@api_view(['GET'])
+@authentication_classes([])
+@permission_classes([])
+def getTraffics(request):
+    T = Traffic.objects.all()
+    serializer = traffic_serializer(T, many=True)
+    return JsonResponse(serializer.data,safe=False)
