@@ -5,18 +5,47 @@ from rest_framework.permissions import AllowAny
 from rest_framework.decorators import authentication_classes, permission_classes
 import bcrypt
 from . serializer import *
+from django.contrib.auth.models import User
+from django.contrib.auth import login
+
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([])
+def addAdmin(request):
+    if Admin.objects.all().filter(username=request.data.get('username')):
+        newserial = [{'status':"fail",'reason':"account with the username already exists"}]
+        return JsonResponse(newserial,safe=False)
+    else:
+        hashed = bcrypt.hashpw(request.data.get('password').encode('utf8'),bcrypt.gensalt())
+        A =  Admin(f_name = request.data.get('firstname'),l_name = request.data.get('lastname'),
+                 username = request.data.get('username'),password = hashed.decode('utf8') ,p_image=request.data.get('pimage'),
+                 email = request.data.get('email'),phone = request.data.get('phone'))
+        A.save()
+        u = User.objects.create_user(username=request.data.get('username'),
+                                     password=request.data.get('password'),
+                                     is_active=True,is_staff=False)
+        newserial = [{'status':"created"}] 
+        return JsonResponse(newserial,safe=False) 
 
 @api_view(['POST'])
 @authentication_classes([])
 @permission_classes([])
 def addNewTraffic(request):
     A = Admin.objects.get(id=request.data.get('admin_id'))
-    T =  Traffic(f_name = request.data.get('firstname'),l_name = request.data.get('lastname'),
-                 user_name = request.data.get('username'), p_image=request.data.get('pimage'),
+    if Traffic.objects.all().filter(username=request.data.get('username')):
+        newserial = [{'status':"fail",'reason':"account with the username already exists"}]
+        return JsonResponse(newserial,safe=False)
+    else:
+        hashed = bcrypt.hashpw(request.data.get('password').encode('utf8'),bcrypt.gensalt())
+        T =  Traffic(f_name = request.data.get('firstname'),l_name = request.data.get('lastname'),
+                 user_name = request.data.get('username'),password = hashed.decode('utf8') ,p_image=request.data.get('pimage'),
                  email = request.data.get('email'),phone = request.data.get('phone'),admin = A )
-    T.save()
-    newserial = [{'status':"created"}] 
-    return JsonResponse(newserial,safe=False) 
+        T.save()
+        u = User.objects.create_user(username=request.data.get('username'),
+                                     password=request.data.get('password'),
+                                     is_active=True,is_staff=False)
+        newserial = [{'status':"created"}] 
+        return JsonResponse(newserial,safe=False) 
 
 @api_view(['POST'])
 @authentication_classes([])
@@ -70,6 +99,10 @@ def accountcreate(request):
                kebele=request.data.get('kebele'),phone=request.data.get('phone'),public_key=request.data.get('publickey'),
                private_key=request.data.get('privatekey'),password=hashed.decode('utf8'),isappoved=request.data.get('isapproved'),
                admin=a)
+        c.save()
+        u = User.objects.create_user(username=request.data.get('username'),
+                                     password=request.data.get('password'),
+                                     is_active=True,is_staff=False)
         newserial = [{'status':"created"}] 
         return JsonResponse(newserial,safe=False)
 
@@ -80,3 +113,91 @@ def getTraffics(request):
     T = Traffic.objects.all()
     serializer = traffic_serializer(T, many=True)
     return JsonResponse(serializer.data,safe=False)
+
+@api_view(['GET'])
+@authentication_classes([])
+@permission_classes([])
+def getClients(request):
+    C = Client.objects.all()
+    serializer = client_serializer(C, many=True)
+    return JsonResponse(serializer.data,safe=False)
+
+@api_view(['GET'])
+@authentication_classes([])
+@permission_classes([])
+def getAccidents(request):
+    A = Accident.objects.all()
+    serializer = accident_serializer(A, many=True)
+    return JsonResponse(serializer.data,safe=False)
+
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([])
+def changePassword(request):
+    typeid = request.data.get('typeid')
+    pw = request.data.get('oldpassword').encode('utf8')
+    newpw = request.data.get('newpassword').encode('utf8')
+    adminaccount = Admin.objects.all().filter(username=typeid)
+    trafficaccount = Traffic.objects.all().filter(user_name=typeid)
+    clientaccount = Client.objects.all().filter(username=typeid)
+    passwordchecker= 'password does not match'
+    if adminaccount:
+        for a in adminaccount:
+            if bcrypt.checkpw(pw,a.password.encode('utf-8')):
+                passwordchecker='password matches'
+                hashed = bcrypt.hashpw(newpw,bcrypt.gensalt())
+                myadminobject = Admin.objects.get(username = typeid)
+                u = User.objects.get(username = typeid)
+                if u:
+                    u.set_password(newpw.decode('utf8'))
+                    u.save()
+                myadminobject.password = hashed.decode('utf8')
+                myadminobject.save()
+        if passwordchecker=='password does not match':
+            passwordchecker = 'wrong old password'
+            
+        
+    elif trafficaccount:
+        for t in trafficaccount:
+            if bcrypt.checkpw(pw,t.password.encode('utf-8')):
+                passwordchecker='password matches'
+                hashed = bcrypt.hashpw(newpw,bcrypt.gensalt())
+                mytrafficobject = Traffic.objects.get(user_name = typeid)
+                u = User.objects.get(username = typeid)
+                if u:
+                    u.set_password(newpw.decode('utf8'))
+                    u.save()
+                mytrafficobject.password = hashed.decode('utf8')
+                mytrafficobject.save()
+        if passwordchecker=='password does not match':
+            passwordchecker = 'wrong old password'
+
+        
+    elif clientaccount:
+        for c in trafficaccount:
+            if bcrypt.checkpw(pw,c.password.encode('utf-8')):
+                passwordchecker='password matches'
+                hashed = bcrypt.hashpw(newpw,bcrypt.gensalt())
+                myclientobject = Client.objects.get(username = typeid)
+                u = User.objects.get(username = typeid)
+                if u:
+                    u.set_password(newpw.decode('utf8'))
+                    u.save()
+                myclientobject.password = hashed.decode('utf8')
+                myclientobject.save()
+        if passwordchecker=='password does not match':
+            passwordchecker = 'wrong old password'
+    else:
+        newserial = [{'status':"username not found"}]
+
+    if request.data.get('oldpassword') == request.data.get('newpassword'):
+        passwordchecker = 'old and new password are same'
+        
+    if passwordchecker == 'password matches':
+        newserial = [{'status':"password changed successfuly"}] 
+    elif passwordchecker == 'wrong old password':
+        newserial = [{'status':"wrong old password"}] 
+    elif passwordchecker == 'old and new password are same':
+        newserial = [{'status':"old and new password are same"}]
+    return JsonResponse(newserial,safe=False)
+
