@@ -24,6 +24,7 @@ def addAdmin(request):
         u = User.objects.create_user(username=request.data.get('username'),
                                      password=request.data.get('password'),
                                      is_active=True,is_staff=False)
+        u.save()
         newserial = [{'status':"created"}] 
         return JsonResponse(newserial,safe=False) 
 
@@ -44,6 +45,7 @@ def addNewTraffic(request):
         u = User.objects.create_user(username=request.data.get('username'),
                                      password=request.data.get('password'),
                                      is_active=True,is_staff=False)
+        u.save()
         newserial = [{'status':"created"}] 
         return JsonResponse(newserial,safe=False) 
 
@@ -103,6 +105,7 @@ def accountcreate(request):
         u = User.objects.create_user(username=request.data.get('username'),
                                      password=request.data.get('password'),
                                      is_active=True,is_staff=False)
+        u.save()
         newserial = [{'status':"created"}] 
         return JsonResponse(newserial,safe=False)
 
