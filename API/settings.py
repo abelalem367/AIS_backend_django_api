@@ -97,34 +97,34 @@ WSGI_APPLICATION = 'API.wsgi.application'
 DATABASES = {
     'default': {},  
     
-    'user_db': {
+    'blacknebcom_user_db': {
         'ENGINE': 'django.db.backends.mysql',
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
         },
-        'NAME': 'user_db',
+        'NAME': 'blacknebcom_user_db',
         'USER': 'root',
         'HOST': 'localhost',
         'PORT': 3306,
         'PASSWORD': '',
     },
-    'ais_db': {
+    'blacknebcom_ais_db': {
         'ENGINE': 'django.db.backends.mysql',
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
         },
-        'NAME': 'ais',
+        'NAME': 'blacknebcom_ais',
         'USER': 'root',
         'HOST': 'localhost',
         'PORT': 3306,
         'PASSWORD': '',
     },
-    'traffic_db': {
+    'blacknebcom_traffic_db': {
         'ENGINE': 'django.db.backends.mysql',
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
         },
-        'NAME': 'traffic',
+        'NAME': 'blacknebcom_traffic',
         'USER': 'root',
         'HOST': 'localhost',
         'PORT': 3306,
