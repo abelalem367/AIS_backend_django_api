@@ -31,7 +31,55 @@ def getData(request):
     items = Admin.objects.all()
     serializer = ais_serializer(items, many=True)
     return JsonResponse(serializer.data,safe=False)
+   
+@api_view(['GET'])
+@authentication_classes([])
+@permission_classes([])
+def getVehicles(request):
+    items = Vehicle.objects.all()
+    serializer = vehicle_serializer(items, many=True)
+    return JsonResponse(serializer.data,safe=False)
     
+@api_view(['GET'])
+@authentication_classes([])
+@permission_classes([])
+def getproposers(request):
+    items = Proposer.objects.all()
+    serializer = proposerlogin_serializer(items, many=True)
+    return JsonResponse(serializer.data,safe=False)
+
+@api_view(['GET'])
+@authentication_classes([])
+@permission_classes([])
+def getgarages(request):
+    items = Garage.objects.all()
+    serializer = garagelogin_serializer(items, many=True)
+    return JsonResponse(serializer.data,safe=False)
+    
+@api_view(['GET'])
+@authentication_classes([])
+@permission_classes([])
+def getexperts(request):
+    items = Expert.objects.all()
+    serializer = expertlogin_serializer(items, many=True)
+    return JsonResponse(serializer.data,safe=False)
+
+@api_view(['GET'])
+@authentication_classes([])
+@permission_classes([])
+def getclaims(request):
+    items = Claim.objects.all()
+    serializer = claim_serializer(items, many=True)
+    return JsonResponse(serializer.data,safe=False)
+
+@api_view(['GET'])
+@authentication_classes([])
+@permission_classes([])
+def getcontracts(request):
+    items = VehicleContract.objects.all()
+    serializer = vehiclecontract_serializer(items, many=True)
+    return JsonResponse(serializer.data,safe=False)
+
 
 
 
