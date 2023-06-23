@@ -7,5 +7,7 @@ urlpatterns = [
     path('creategarageaccount',views.createGarageAccount),
     path('createexpertaccount',views.createExpertAccount),
     path('createproposeraccount',views.createProposerAccount),
-    path('addAdmin',views.addAdmin)
+    path('addAdmin',views.addAdmin),
+    path('sendemail',views.sendEmail)
+
 ]

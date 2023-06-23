@@ -7,7 +7,22 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login
 from rest_framework.permissions import AllowAny
 from rest_framework.decorators import authentication_classes, permission_classes
+from django.core.mail import send_mail
+from django.conf import settings
 
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([])
+def sendEmail(request):
+    message = request.data.get('message')
+    email = request.data.get('email')
+    title = request.data.get('title')
+    send_mail(
+        title, message, 'settings.EMAIL_HOST_USER',
+        [email], fail_silently=False
+    )
+    newserial = [{'status':"email successfuly sent"}] 
+    return JsonResponse(newserial,safe=False) 
 
 @api_view(['GET'])
 @authentication_classes([])
@@ -16,6 +31,9 @@ def getData(request):
     items = Admin.objects.all()
     serializer = ais_serializer(items, many=True)
     return JsonResponse(serializer.data,safe=False)
+    
+
+
 
 @api_view(['POST'])
 @authentication_classes([])

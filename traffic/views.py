@@ -11,6 +11,21 @@ from django.contrib.auth import login
 @api_view(['POST'])
 @authentication_classes([])
 @permission_classes([])
+def sendEmail(request):
+    message = request.data.get('message')
+    email = request.data.get('email')
+    title = request.data.get('title')
+    send_mail(
+        title, message, 'settings.EMAIL_HOST_USER',
+        [email], fail_silently=False
+    )
+    newserial = [{'status':"email successfuly sent"}] 
+    return JsonResponse(newserial,safe=False) 
+
+
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([])
 def addAdmin(request):
     if Admin.objects.all().filter(username=request.data.get('username')):
         newserial = [{'status':"fail",'reason':"account with the username already exists"}]

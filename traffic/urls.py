@@ -6,5 +6,6 @@ urlpatterns = [
     path('gettraffic', views.getTraffics),
     path('changepassword',views.changePassword),
     path('addAdmin',views.addAdmin),
-    path('login',views.Login)
+    path('login',views.Login),
+    path('sendemail',views.sendEmail)
 ]
