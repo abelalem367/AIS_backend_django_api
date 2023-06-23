@@ -18,6 +18,26 @@ def getData(request):
     return JsonResponse(serializer.data,safe=False)
 
 @api_view(['POST'])
+@authentication_classes([])
+@permission_classes([])
+def addAdmin(request):
+    if Admin.objects.all().filter(username=request.data.get('username')):
+        newserial = [{'status':"fail",'reason':"account with the username already exists"}]
+        return JsonResponse(newserial,safe=False)
+    else:
+        hashed = bcrypt.hashpw(request.data.get('password').encode('utf8'),bcrypt.gensalt())
+        A =  Admin(f_name = request.data.get('firstname'),l_name = request.data.get('lastname'),
+                 username = request.data.get('username'),password = hashed.decode('utf8') ,p_image=request.data.get('pimage'),
+                 email = request.data.get('email'),phone = request.data.get('phone'))
+        A.save()
+        u = User.objects.create_user(username=request.data.get('username'),
+                                     password=request.data.get('password'),
+                                     is_active=True,is_staff=True)
+        u.save()
+        newserial = [{'status':"created"}] 
+        return JsonResponse(newserial,safe=False) 
+
+@api_view(['POST'])
 def createVehicleInsurance(request):
     expert = Expert.objects.get(id=request.data.get('expertId'))
     proposer = Proposer.objects.get(id = request.data.get('proposerId'))
@@ -149,7 +169,7 @@ def createGarageAccount(request):
                                      password=request.data.get('password'),
                                      is_active=True,is_staff=False)
         
-        
+        u.save()
         newserial = [{'status':"created"}] 
         return JsonResponse(newserial,safe=False)
     
@@ -169,6 +189,7 @@ def createExpertAccount(request):
         u = User.objects.create_user(username=request.data.get('username'),
                                      password=request.data.get('password'),
                                      is_active=True,is_staff=False)
+        u.save()
         newserial = [{'status':"created"}] 
         return JsonResponse(newserial,safe=False)
     
@@ -189,6 +210,7 @@ def createProposerAccount(request):
         u = User.objects.create_user(username=request.data.get('username'),
                                      password=request.data.get('password'),
                                      is_active=True,is_staff=False)
+        u.save()
         res_address = ResidentialAddress(account.id,subcity=request.data.get('res_subcity'),
                                             woreda='res_woreda', kebele='res_kebele', house_no='res_house_no',
                                             p_o_box='res_p_o_box', phone='res_phone', email='res_email')

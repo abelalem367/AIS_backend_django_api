@@ -28,12 +28,13 @@ def addAdmin(request):
         newserial = [{'status':"created"}] 
         return JsonResponse(newserial,safe=False) 
 
+
 @api_view(['POST'])
 @authentication_classes([])
 @permission_classes([])
 def addNewTraffic(request):
     A = Admin.objects.get(id=request.data.get('admin_id'))
-    if Traffic.objects.all().filter(username=request.data.get('username')):
+    if Traffic.objects.all().filter(user_name=request.data.get('username')):
         newserial = [{'status':"fail",'reason':"account with the username already exists"}]
         return JsonResponse(newserial,safe=False)
     else:
@@ -48,6 +49,71 @@ def addNewTraffic(request):
         u.save()
         newserial = [{'status':"created"}] 
         return JsonResponse(newserial,safe=False) 
+
+
+
+@api_view(['POST']) 
+def Login(request):
+    usr = request.data.get("username")
+    pw = request.data.get("password").encode("utf8")
+    adminaccount = Admin.objects.all().filter(username=usr)
+    trafficaccount = Traffic.objects.all().filter(user_name=usr)
+    clientaccount = Client.objects.all().filter(username=usr)
+    if adminaccount:
+        serializer = adminlogin_serializer(adminaccount,many=True)
+        newserial = list(serializer.data)
+        for a in adminaccount:
+            if bcrypt.checkpw(pw,a.password.encode('utf-8')):
+                if serializer.is_valid:
+                    
+                    newserial[0]['status']="pass"
+                    newserial[0]['accounttype']="admin"            
+                    return JsonResponse(newserial, safe=False)
+            
+            else:
+                s = {'status': "fail",'reason':"wrong password"} 
+                newserial = [] 
+                newserial.append(s) 
+                return JsonResponse(newserial,safe=False)
+    elif trafficaccount:
+        serializer = traffic_serializer(trafficaccount,many=True)
+        newserial = list(serializer.data)
+        for e in trafficaccount:
+            if bcrypt.checkpw(pw,e.password.encode('utf-8')):
+                if serializer.is_valid:
+                    newserial[0]['status']="pass"
+                    newserial[0]['accounttype']="traffic"              
+                    return JsonResponse(newserial, safe=False)
+            
+            else:
+                s = {'status': "fail",'reason':"wrong password"} 
+                newserial = [] 
+                newserial.append(s) 
+                return JsonResponse(newserial,safe=False)
+    elif clientaccount:
+        serializer = client_serializer(clientaccount,many=True)
+        newserial = list(serializer.data)
+        for p in clientaccount:
+            if bcrypt.checkpw(pw,p.password.encode('utf-8')):
+                if serializer.is_valid:
+                    newserial[0]['status']="pass"
+                    newserial[0]['accounttype']="client"              
+                    return JsonResponse(newserial, safe=False)
+            
+            else:
+                s = {'status': "fail",'reason':"wrong password"} 
+                newserial = [] 
+                newserial.append(s) 
+                return JsonResponse(newserial,safe=False)
+    else:
+        s = {'status': "fail",'reason':"username doesnot exist"} 
+        newserial = [] 
+        newserial.append(s) 
+        return JsonResponse(newserial,safe=False)
+        
+    
+
+
 
 @api_view(['POST'])
 @authentication_classes([])

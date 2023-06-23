@@ -5,6 +5,6 @@ urlpatterns = [
     path('registeraccident', views.registerAccident),
     path('gettraffic', views.getTraffics),
     path('changepassword',views.changePassword),
-    path('addAdmin',views.addAdmin)
-
+    path('addAdmin',views.addAdmin),
+    path('login',views.Login)
 ]
