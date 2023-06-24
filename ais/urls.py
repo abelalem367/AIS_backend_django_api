@@ -14,5 +14,10 @@ urlpatterns = [
     path('getgarages',views.getgarages),
     path('getexperts',views.getexperts),
     path('getclaims',views.getclaims),
-    path('getcontracts',views.getcontracts)
+    path('changepassword',views.changePassword),
+    path('getcontracts',views.getcontracts),
+    path('addvehiclecontract',views.addVehicleContract),
+    path('getclaimsbot',views.getclaimsbot),
+    path('addclaim',views.addClaim),
+    path('updateaccount',views.updateaccount)
 ]

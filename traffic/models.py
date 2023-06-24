@@ -109,6 +109,7 @@ class Driver(models.Model):
 
 
 class InjuredPeople(models.Model):
+    id = models.AutoField(db_column='ID', primary_key=True)  # Field name made lowercase.
     accident = models.ForeignKey(Accident, models.DO_NOTHING)
     injurytype = models.CharField(max_length=255)
     f_name = models.CharField(max_length=255)

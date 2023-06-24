@@ -72,6 +72,19 @@ def getclaims(request):
     serializer = claim_serializer(items, many=True)
     return JsonResponse(serializer.data,safe=False)
 
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([])
+def getclaimsbot(request):
+    items = Claim.objects.all().filter(proposer_id=request.data.get("proposerID"))
+    if items:    
+        serializer = claim_serializer(items, many=True)
+        return JsonResponse(serializer.data,safe=False)
+    else:
+        newserial = [{'status':"fail, no claims found using the given proposerID"}] 
+        return JsonResponse(newserial,safe=False)
+
+
 @api_view(['GET'])
 @authentication_classes([])
 @permission_classes([])
@@ -80,8 +93,23 @@ def getcontracts(request):
     serializer = vehiclecontract_serializer(items, many=True)
     return JsonResponse(serializer.data,safe=False)
 
-
-
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([])
+def addVehicleContract(request):
+    veh_id = Vehicle.objects.get(id=request.data.get('vehicle_id'))
+    proposer_id = Proposer.objects.get(id = request.data.get('proposer_id'))
+    contr_id = VehicleContract.objects.all().filter(vehicle=request.data.get('vehicle_id'))
+    if contr_id:
+        newserial = [{'status':"fail",'reason':"account with the vehicle id is already registered"}]
+        return JsonResponse(newserial,safe=False)
+    else:
+        v = VehicleContract(vehicle=veh_id,proposer=proposer_id,contract_type=request.data.get('contractType'),
+                        contract_price=request.data.get('contractPrice'),contract_date=request.data.get('contractDate'),
+                        expire_date= request.data.get('expireDate'),is_approved=request.data.get('isApproved'))
+        v.save()
+        newserial = [{'status':"created"}] 
+        return JsonResponse(newserial,safe=False) 
 
 @api_view(['POST'])
 @authentication_classes([])
@@ -103,6 +131,26 @@ def addAdmin(request):
         newserial = [{'status':"created"}] 
         return JsonResponse(newserial,safe=False) 
 
+
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([])
+def addClaim(request):
+    veh = Vehicle.objects.get(id=request.data.get('vehicleId'))
+    gar = Garage.objects.get(id=request.data.get('garageId'))
+    prop = Proposer.objects.get(id = request.data.get('proposerId'))
+    if Claim.objects.all().filter(accident_id=request.data.get('accident_id')):
+        newserial = [{'status':"fail",'reason':"claim with the accident id already submitted"}]
+        return JsonResponse(newserial,safe=False)
+    else:
+        claimobject = Claim(date=request.data.get('date'),accident_id = request.data.get('accident_id'),
+        total_price=request.data.get('totalPrice'),closed_date=request.data.get('closedDate'),
+        progress=request.data.get('progress'),proposer=prop,garage=gar,vehicle=veh)
+        claimobject.save()
+        newserial = [{'status':"created"}] 
+        return JsonResponse(newserial,safe=False) 
+    
+    
 @api_view(['POST'])
 def createVehicleInsurance(request):
     expert = Expert.objects.get(id=request.data.get('expertId'))
@@ -184,7 +232,9 @@ def Login(request):
             if bcrypt.checkpw(pw,p.password.encode('utf-8')):
                 if serializer.is_valid:
                     newserial[0]['status']="pass"
-                    newserial[0]['account type']="proposer"              
+                    newserial[0]['accounttype']="proposer"   
+                    
+                    newserial[0]['proposerID']=p.id           
                     return JsonResponse(newserial, safe=False)
             
             else:
@@ -288,3 +338,131 @@ def createProposerAccount(request):
         bus_address.save()
         newserial = [{'status':"created"}] 
         return JsonResponse(newserial,safe=False)
+
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([])
+def updateaccount(request):
+    usr = request.data.get("username")
+    adminaccount = Admin.objects.all().filter(username=usr)
+    expertaccount = Expert.objects.all().filter(username=usr)
+    proposeraccount = Proposer.objects.all().filter(username=usr)
+    garageaccount = Garage.objects.all().filter(username=usr)
+    if adminaccount:
+        adminaccount = Admin.objects.get(username=usr)
+        adminaccount.f_name = request.data.get('f_name')
+        adminaccount.l_name = request.data.get('l_name')
+        adminaccount.email = request.data.get('email')
+        adminaccount.phone = request.data.get('phone')
+        adminaccount.save()
+    elif garageaccount:
+        garageaccount = Garage.objects.get(username=usr)
+        garageaccount.name = request.data.get('name')
+        garageaccount.address = request.data.get('address')
+        garageaccount.email = request.data.get('email')
+        garageaccount.phone = request.data.get('phone')
+        garageaccount.save()
+    elif expertaccount:
+        expertaccount = Expert.objects.get(username=usr)
+        expertaccount.f_name = request.data.get('f_name')
+        expertaccount.l_name = request.data.get('l_name')
+        expertaccount.email = request.data.get('email')
+        expertaccount.phone = request.data.get('phone')
+        expertaccount.save()
+    elif proposeraccount:
+        proposeraccount = Proposer.objects.get(username=usr)
+        proposeraccount.f_name = request.data.get('f_name')
+        proposeraccount.l_name = request.data.get('l_name')
+        expertaccount.save()
+    else:
+        newserial = [{'status':"fail",'reason':"no account with the provided username exists"}] 
+        return JsonResponse(newserial,safe=False)
+    newserial = [{'status':"updated successfuly"}] 
+    return JsonResponse(newserial,safe=False)
+    
+
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([])
+def changePassword(request):
+    typeid = request.data.get('typeid')
+    pw = request.data.get('oldpassword').encode('utf8')
+    newpw = request.data.get('newpassword').encode('utf8')
+    adminaccount = Admin.objects.all().filter(username=typeid)
+    proposeraccount = Proposer.objects.all().filter(username=typeid)
+    expertaccount = Expert.objects.all().filter(username=typeid)
+    garageaccount = Garage.objects.all().filter(username=typeid)
+    passwordchecker= 'password does not match'
+    if adminaccount:
+        for a in adminaccount:
+            if bcrypt.checkpw(pw,a.password.encode('utf-8')):
+                passwordchecker='password matches'
+                hashed = bcrypt.hashpw(newpw,bcrypt.gensalt())
+                myadminobject = Admin.objects.get(username = typeid)
+                u = User.objects.get(username = typeid)
+                if u:
+                    u.set_password(newpw.decode('utf8'))
+                    u.save()
+                myadminobject.password = hashed.decode('utf8')
+                myadminobject.save()
+        if passwordchecker=='password does not match':
+            passwordchecker = 'wrong old password'
+            
+        
+    elif proposeraccount:
+        for t in proposeraccount:
+            if bcrypt.checkpw(pw,t.password.encode('utf-8')):
+                passwordchecker='password matches'
+                hashed = bcrypt.hashpw(newpw,bcrypt.gensalt())
+                myproposerobject = Proposer.objects.get(username = typeid)
+                u = User.objects.get(username = typeid)
+                if u:
+                    u.set_password(newpw.decode('utf8'))
+                    u.save()
+                myproposerobject.password = hashed.decode('utf8')
+                myproposerobject.save()
+        if passwordchecker=='password does not match':
+            passwordchecker = 'wrong old password'
+
+        
+    elif expertaccount:
+        for c in expertaccount:
+            if bcrypt.checkpw(pw,c.password.encode('utf-8')):
+                passwordchecker='password matches'
+                hashed = bcrypt.hashpw(newpw,bcrypt.gensalt())
+                myexpertobject = Expert.objects.get(username = typeid)
+                u = User.objects.get(username = typeid)
+                if u:
+                    u.set_password(newpw.decode('utf8'))
+                    u.save()
+                myexpertobject.password = hashed.decode('utf8')
+                myexpertobject.save()
+        if passwordchecker=='password does not match':
+            passwordchecker = 'wrong old password'
+    elif garageaccount:
+        for c in garageaccount:
+            if bcrypt.checkpw(pw,c.password.encode('utf-8')):
+                passwordchecker='password matches'
+                hashed = bcrypt.hashpw(newpw,bcrypt.gensalt())
+                mygarageobject = Garage.objects.get(username = typeid)
+                u = User.objects.get(username = typeid)
+                if u:
+                    u.set_password(newpw.decode('utf8'))
+                    u.save()
+                mygarageobject.password = hashed.decode('utf8')
+                mygarageobject.save()
+        if passwordchecker=='password does not match':
+            passwordchecker = 'wrong old password'
+    else:
+        newserial = [{'status':"username not found"}]
+
+    if request.data.get('oldpassword') == request.data.get('newpassword'):
+        passwordchecker = 'old and new password are same'
+    if passwordchecker == 'password matches':
+        newserial = [{'status':"password changed successfuly"}] 
+    elif passwordchecker == 'wrong old password':
+        newserial = [{'status':"wrong old password"}] 
+    elif passwordchecker == 'old and new password are same':
+        newserial = [{'status':"old and new password are same"}]
+    return JsonResponse(newserial,safe=False)
+

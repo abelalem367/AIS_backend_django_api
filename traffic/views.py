@@ -7,6 +7,8 @@ import bcrypt
 from . serializer import *
 from django.contrib.auth.models import User
 from django.contrib.auth import login
+import json
+from itertools import chain
 
 @api_view(['POST'])
 @authentication_classes([])
@@ -215,8 +217,63 @@ def getClients(request):
 @permission_classes([])
 def getAccidents(request):
     A = Accident.objects.all()
-    serializer = accident_serializer(A, many=True)
-    return JsonResponse(serializer.data,safe=False)
+    D = Driver.objects.all()
+    P = PlateNumber.objects.all()
+    injp = InjuredPeople.objects.all()
+    involvedveh = InvolvedVehicle.objects.all()
+    acima = AccidentImages.objects.all()
+    
+    serializer1 = accident_serializer(A, many=True)
+    serializer2 = driver_serializer(D, many=True)
+    serializer3 = platenumber_serializer(P, many=True)
+    serializer4 = injuredpeople_serializer(injp,  many = True)
+    serializer5 = involvedvehicle_serializer(involvedveh, many=True)
+    serializer6 = accimages_serializer(acima, many=True)
+    concatenated_data = []
+    concatenated_data.append(serializer1.data)
+    concatenated_data.append(serializer2.data)
+    concatenated_data.append(serializer3.data)
+    concatenated_data.append(serializer4.data)
+    concatenated_data.append(serializer5.data)
+    concatenated_data.append(serializer6.data)
+    print(concatenated_data)
+    return JsonResponse(concatenated_data,safe=False)
+
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([])
+def updateaccount(request):
+    usr = request.data.get("username")
+    adminaccount = Admin.objects.all().filter(username=usr)
+    clientaccount = Client.objects.all().filter(username=usr)
+    trafficaccount = Traffic.objects.all().filter(user_name=usr)
+    if adminaccount:
+        adminaccount = Admin.objects.get(username=usr)
+        adminaccount.f_name = request.data.get('f_name')
+        adminaccount.l_name = request.data.get('l_name')
+        adminaccount.email = request.data.get('email')
+        adminaccount.phone = request.data.get('phone')
+        adminaccount.save()
+    elif clientaccount:
+        clientaccount = Client.objects.get(username=usr)
+        clientaccount.f_name = request.data.get('f_name')
+        clientaccount.l_name = request.data.get('l_name')
+        clientaccount.email = request.data.get('email')
+        clientaccount.phone = request.data.get('phone')
+        clientaccount.save()
+    elif trafficaccount:
+        trafficaccount = Traffic.objects.get(user_name=usr)
+        trafficaccount.f_name = request.data.get('f_name')
+        trafficaccount.l_name = request.data.get('l_name')
+        trafficaccount.save()
+    else:
+        newserial = [{'status':"fail",'reason':"no account with the provided username exists"}] 
+        return JsonResponse(newserial,safe=False)
+    newserial = [{'status':"updated successfuly"}] 
+    return JsonResponse(newserial,safe=False)
+    
+
+
 
 @api_view(['POST'])
 @authentication_classes([])

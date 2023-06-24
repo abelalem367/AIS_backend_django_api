@@ -15,7 +15,31 @@ class client_serializer(serializers.ModelSerializer):
     class Meta:
         model = Client
         fields = '__all__'
-        
+   
+class driver_serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Driver
+        fields = '__all__'
+             
+class platenumber_serializer(serializers.ModelSerializer):
+    class Meta:
+        model = PlateNumber
+        fields = '__all__'
+
+class injuredpeople_serializer(serializers.ModelSerializer):
+    class Meta:
+        model = InjuredPeople
+        fields = '__all__'
+class involvedvehicle_serializer(serializers.ModelSerializer):
+    class Meta:
+        model = InvolvedVehicle
+        fields = '__all__'
+
+class accimages_serializer(serializers.ModelSerializer):
+    class Meta:
+        model = AccidentImages
+        fields = '__all__'
+
 class accident_serializer(serializers.ModelSerializer):
     class Meta:
         model = Accident
