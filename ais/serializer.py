@@ -6,6 +6,21 @@ class ais_serializer(serializers.ModelSerializer):
         model = Admin
         fields = '__all__'
 
+class vehicle_serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Vehicle
+        fields = '__all__'
+
+class claim_serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Claim
+        fields = '__all__'
+
+class vehiclecontract_serializer(serializers.ModelSerializer):
+    class Meta:
+        model = VehicleContract
+        fields = '__all__'
+
 class adminlogin_serializer(serializers.ModelSerializer):
     class Meta:
         model = Admin

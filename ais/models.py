@@ -2,11 +2,7 @@
 from django.db import models
 
     
-    
-    
-    
-    
-    
+
 class Admin(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True)  # Field name made lowercase.
     f_name = models.CharField(max_length=255)

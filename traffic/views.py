@@ -156,15 +156,19 @@ def registerAccident(request):
     inVolved = request.data.get('involvedVehicles')
     for i in inVolved:
         IV = InvolvedVehicle(accident=a, driver_f_name=i['driverFname'],driver_l_name =i['driverLname'],
-                             owner_f_name=i['ownerFname'],owner_l_name=i['driverLname'],
+                             owner_f_name=i['ownerFname'],owner_l_name=i['ownerLname'],
                              driver_license_number = i['driverLicencenumber'],driver_phone=i['driverPhone'],
                              owner_phone=i['ownerPhone'])
         IV.save()
         IVplate = InvolvedVehiclePlate(involved_vehicle=IV, code=i['icode'],city=i['icity'],number=i['inumber'])
         IVplate.save()
+    acc_images = request.data.get('images')
+    for acc in acc_images:
+        print(acc)
+        acc_image = AccidentImages(accident=a,image_path=acc)
+        acc_image.save()
     newserial = [{'status':"created"}] 
     return JsonResponse(newserial,safe=False) 
-    #acc_images = AccidentImages()
     
 @api_view(['POST'])
 @authentication_classes([])
