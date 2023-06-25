@@ -11,6 +11,18 @@ class vehicle_serializer(serializers.ModelSerializer):
         model = Vehicle
         fields = '__all__'
 
+class previousaccident_serializer(serializers.ModelSerializer):
+    class Meta:
+        model = PreviousAccident
+        fields = ('vehicle','accident_date','vehicle_damage','personal_claims','property_damage')
+class otherinsurance_serializer(serializers.ModelSerializer):
+    class Meta:
+        model = OtherInsurances
+        fields = '__all__'
+class vehicleplate_serializer(serializers.ModelSerializer):
+    class Meta:
+        model = VehiclePlate
+        fields = '__all__'
 class claim_serializer(serializers.ModelSerializer):
     class Meta:
         model = Claim

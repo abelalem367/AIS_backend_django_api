@@ -84,7 +84,8 @@ def Login(request):
                 if serializer.is_valid:
                     
                     newserial[0]['status']="pass"
-                    newserial[0]['accounttype']="admin"            
+                    newserial[0]['accounttype']="admin"
+                    newserial[0]['adminID']=a.id            
                     return JsonResponse(newserial, safe=False)
             
             else:
@@ -99,7 +100,8 @@ def Login(request):
             if bcrypt.checkpw(pw,e.password.encode('utf-8')):
                 if serializer.is_valid:
                     newserial[0]['status']="pass"
-                    newserial[0]['accounttype']="traffic"              
+                    newserial[0]['accounttype']="traffic"  
+                    newserial[0]['trafficID']=e.id                        
                     return JsonResponse(newserial, safe=False)
             
             else:
@@ -114,7 +116,8 @@ def Login(request):
             if bcrypt.checkpw(pw,p.password.encode('utf-8')):
                 if serializer.is_valid:
                     newserial[0]['status']="pass"
-                    newserial[0]['accounttype']="client"              
+                    newserial[0]['accounttype']="client"    
+                    newserial[0]['adminID']=p.id                      
                     return JsonResponse(newserial, safe=False)
             
             else:
