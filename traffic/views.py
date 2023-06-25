@@ -239,7 +239,6 @@ def getAccidents(request):
     concatenated_data.append(serializer4.data)
     concatenated_data.append(serializer5.data)
     concatenated_data.append(serializer6.data)
-    print(concatenated_data)
     return JsonResponse(concatenated_data,safe=False)
 
 @api_view(['POST'])
