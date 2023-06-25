@@ -177,7 +177,7 @@ def createVehicleInsurance(request):
                 )      
     v.save()
     vehPlate = VehiclePlate(vehicle=v, code=request.data.get('code'),city=request.data.get('city'),number=request.data.get('number'))
-    vehPate.save()
+    vehPlate.save()
     O = OtherInsurances(
         v.id,cancel = request.data.get('cancel'),decline=request.data.get('decline'),
         iae = request.data.get('iae'),isc = request.data.get('isc'),refuse = request.data.get('refuse'),
