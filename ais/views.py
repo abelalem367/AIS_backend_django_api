@@ -10,6 +10,7 @@ from rest_framework.decorators import authentication_classes, permission_classes
 from django.core.mail import send_mail
 from django.conf import settings
 
+
 @api_view(['POST'])
 @authentication_classes([])
 @permission_classes([])
@@ -55,7 +56,8 @@ def getVehicles(request):
     concatenated_data.append(serializer4.data)
     concatenated_data.append(serializer5.data)
     return JsonResponse(concatenated_data,safe=False)
-    
+
+
 @api_view(['GET'])
 @authentication_classes([])
 @permission_classes([])
@@ -97,8 +99,74 @@ def getclaimsbot(request):
         serializer = claim_serializer(items, many=True)
         return JsonResponse(serializer.data,safe=False)
     else:
-        newserial = [{'status':"fail, no claims found using the given proposerID"}] 
+        newserial = [] 
         return JsonResponse(newserial,safe=False)
+
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([])
+def createbid(request):
+    veh=Vehicle.objects.get(id=request.data.get("vehicleID"))
+    vehic = Vehicle.objects.all().filter(id=request.data.get("vehicleID"))
+    if vehic:
+        b = Bid(vehicle=veh)
+        b.save()
+        items = request.data.get('items')
+        for i in items:
+            item = ItemsList(bid=b,item_name=i)
+            item.save()
+        newserial = [{'status':"pass"}] 
+        return JsonResponse(newserial,safe=False)
+    else:
+        newserial = [{'status':"fail, no vehicle found using the given vehicleID"}] 
+        return JsonResponse(newserial,safe=False)
+
+@api_view(['GET'])
+@authentication_classes([])
+@permission_classes([])
+def getbid(request):
+    b = Bid.objects.all()
+    bs = bid_serializer(b,many=True)
+    i = ItemsList.objects.all()
+    il = itemslist_serializer(i, many=True)
+    concatenated_data = []
+    concatenated_data.append(bs.data)
+    concatenated_data.append(il.data)
+    return JsonResponse(concatenated_data,safe=False)
+
+@api_view(['GET'])
+@authentication_classes([])
+@permission_classes([])
+def getgaragebid(request):
+    garagebidobjects = GarageBid.objects.all()
+    garagebidserializer = garagebid_serializer(garagebidobjects,many=True)
+    itemgarage_price_object = ItemGaragePrice.objects.all()
+    itemgarage_price_serializer = itemgarageprice_serializer(itemgarage_price_object,many=True)
+    bidobject = Bid.objects.all()
+    bidserializer = bid_serializer(bidobject,many=True)
+    concatenated_data = []
+    concatenated_data.append(garagebidserializer.data)
+    concatenated_data.append(itemgarage_price_serializer.data)
+    concatenated_data.append(bidserializer.data)
+    return JsonResponse(concatenated_data,safe=False)
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([])
+def creategaragebid(request):
+    b=Bid.objects.get(id=request.data.get("bidID"))
+    bb = Bid.objects.all().filter(id=request.data.get("bidID"))
+    g=Garage.objects.get(id=request.data.get("garageID"))
+    gg = Garage.objects.all().filter(id=request.data.get("garageID"))
+    if bb and gg:
+        gid=GarageBid(bid=b,garage=g)
+        gid.save()
+        igp = ItemGaragePrice(garage_bid = gid, item_name=request.data.get("item"),price=request.data.get("price"))
+        igp.save()
+        newserial = [{'status':"created"}] 
+        return JsonResponse(newserial,safe=False)
+    else:
+        newserial = [{'status':"fail"}] 
+        return JsonResponse(newserial,safe=False) 
 
 
 @api_view(['GET'])

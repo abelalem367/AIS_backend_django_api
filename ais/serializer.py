@@ -32,6 +32,28 @@ class extrafitting_serializer(serializers.ModelSerializer):
         model = ExtraFitting
         fields = '__all__'
 
+class bid_serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Bid
+        fields = '__all__'
+
+
+class itemgarageprice_serializer(serializers.ModelSerializer):
+    class Meta:
+        model = ItemGaragePrice
+        fields = ('garage_bid','item_name','price')
+
+class garagebid_serializer(serializers.ModelSerializer):
+    class Meta:
+        model = GarageBid
+        fields = '__all__'
+
+
+class itemslist_serializer(serializers.ModelSerializer):
+    class Meta:
+        model = ItemsList
+        fields = '__all__'
+
 class vehiclecontract_serializer(serializers.ModelSerializer):
     class Meta:
         model = VehicleContract

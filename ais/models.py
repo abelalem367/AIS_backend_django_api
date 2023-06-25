@@ -163,7 +163,8 @@ class Hospitals(models.Model):
 
 
 class ItemGaragePrice(models.Model):
-    garage_bid = models.OneToOneField(GarageBid, models.DO_NOTHING, primary_key=True)
+    id = models.AutoField(db_column='ID', primary_key=True)  # Field name made lowercase.
+    garage_bid = models.ForeignKey(GarageBid, models.DO_NOTHING)
     item_name = models.CharField(max_length=255)
     price = models.CharField(max_length=255)
 
@@ -173,7 +174,8 @@ class ItemGaragePrice(models.Model):
 
 
 class ItemsList(models.Model):
-    bid = models.OneToOneField(Bid, models.DO_NOTHING, primary_key=True)
+    id = models.AutoField(db_column='ID', primary_key=True)  # Field name made lowercase.
+    bid = models.ForeignKey(Bid, models.DO_NOTHING)
     item_name = models.CharField(max_length=255)
 
     class Meta:

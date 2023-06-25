@@ -19,5 +19,9 @@ urlpatterns = [
     path('addvehiclecontract',views.addVehicleContract),
     path('getclaimsbot',views.getclaimsbot),
     path('addclaim',views.addClaim),
-    path('updateaccount',views.updateaccount)
+    path('updateaccount',views.updateaccount),
+    path('createbid',views.createbid),
+    path('creategaragebid',views.creategaragebid),
+    path('getbid',views.getbid),
+    path('getgaragebid',views.getgaragebid)
 ]
