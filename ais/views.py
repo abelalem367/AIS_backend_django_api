@@ -37,8 +37,19 @@ def getData(request):
 @permission_classes([])
 def getVehicles(request):
     items = Vehicle.objects.all()
-    serializer = vehicle_serializer(items, many=True)
-    return JsonResponse(serializer.data,safe=False)
+    prevAcc = PreviousAccident.objects.all()
+    otheInsu = OtherInsurances.objects.all()
+    vehPlate = VehiclePlate.objects.all()
+    serializer1 = vehicle_serializer(items, many=True)
+    serializer2 = previousaccident_serializer(prevAcc, many=True)
+    serializer3 = otherinsurance_serializer(otheInsu, many=True)
+    serializer4 = vehicleplate_serializer(vehPlate,  many = True)
+    concatenated_data = []
+    concatenated_data.append(serializer1.data)
+    concatenated_data.append(serializer2.data)
+    concatenated_data.append(serializer3.data)
+    concatenated_data.append(serializer4.data)
+    return JsonResponse(concatenated_data,safe=False)
     
 @api_view(['GET'])
 @authentication_classes([])
@@ -165,6 +176,8 @@ def createVehicleInsurance(request):
                     expert = expert ,proposer = proposer
                 )      
     v.save()
+    vehPlate = VehiclePlate(vehicle=v, code=request.data.get('code'),city=request.data.get('city'),number=request.data.get('number'))
+    vehPate.save()
     O = OtherInsurances(
         v.id,cancel = request.data.get('cancel'),decline=request.data.get('decline'),
         iae = request.data.get('iae'),isc = request.data.get('isc'),refuse = request.data.get('refuse'),
