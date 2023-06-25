@@ -40,15 +40,20 @@ def getVehicles(request):
     prevAcc = PreviousAccident.objects.all()
     otheInsu = OtherInsurances.objects.all()
     vehPlate = VehiclePlate.objects.all()
+    extr = ExtraFitting.objects.all()
+    
     serializer1 = vehicle_serializer(items, many=True)
     serializer2 = previousaccident_serializer(prevAcc, many=True)
     serializer3 = otherinsurance_serializer(otheInsu, many=True)
     serializer4 = vehicleplate_serializer(vehPlate,  many = True)
+    serializer5 = extrafitting_serializer(extr,  many = True)
+    
     concatenated_data = []
     concatenated_data.append(serializer1.data)
     concatenated_data.append(serializer2.data)
     concatenated_data.append(serializer3.data)
     concatenated_data.append(serializer4.data)
+    concatenated_data.append(serializer5.data)
     return JsonResponse(concatenated_data,safe=False)
     
 @api_view(['GET'])
@@ -197,8 +202,6 @@ def createVehicleInsurance(request):
         pa.save()
     newserial = [{'status':"created"}] 
     return JsonResponse(newserial,safe=False) 
-
-
 @api_view(['POST']) 
 def Login(request):
     usr = request.data.get("username")
@@ -215,7 +218,8 @@ def Login(request):
                 if serializer.is_valid:
                     
                     newserial[0]['status']="pass"
-                    newserial[0]['account type']="admin"            
+                    newserial[0]['accounttype']="admin"
+                    newsrial[0]['adminID']=a.id            
                     return JsonResponse(newserial, safe=False)
             
             else:
@@ -230,7 +234,8 @@ def Login(request):
             if bcrypt.checkpw(pw,e.password.encode('utf-8')):
                 if serializer.is_valid:
                     newserial[0]['status']="pass"
-                    newserial[0]['account type']="expert"              
+                    newserial[0]['accounttype']="expert"   
+                    newsrial[0]['expertID']=e.id                       
                     return JsonResponse(newserial, safe=False)
             
             else:
@@ -245,8 +250,7 @@ def Login(request):
             if bcrypt.checkpw(pw,p.password.encode('utf-8')):
                 if serializer.is_valid:
                     newserial[0]['status']="pass"
-                    newserial[0]['accounttype']="proposer"   
-                    
+                    newserial[0]['accounttype']="proposer"               
                     newserial[0]['proposerID']=p.id           
                     return JsonResponse(newserial, safe=False)
             
@@ -262,7 +266,8 @@ def Login(request):
             if bcrypt.checkpw(pw,g.password.encode('utf-8')):
                 if serializer.is_valid:
                     newserial[0]['status']="pass"
-                    newserial[0]['account type']="garage"             
+                    newserial[0]['accounttype']="garage"   
+                    newsrial[0]['garageID']=g.id                      
                     return JsonResponse(newserial, safe=False)
             
             else:

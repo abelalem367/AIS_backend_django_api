@@ -27,6 +27,10 @@ class claim_serializer(serializers.ModelSerializer):
     class Meta:
         model = Claim
         fields = '__all__'
+class extrafitting_serializer(serializers.ModelSerializer):
+    class Meta:
+        model = ExtraFitting
+        fields = '__all__'
 
 class vehiclecontract_serializer(serializers.ModelSerializer):
     class Meta:
