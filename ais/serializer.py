@@ -78,3 +78,7 @@ class proposerlogin_serializer(serializers.ModelSerializer):
     class Meta:
         model = Proposer
         fields = ('f_name','l_name','username','p_image')
+class residential_serializer(serializers.ModelSerializer):
+    class Meta:
+        model = ResidentialAddress
+        fields = '__all__'

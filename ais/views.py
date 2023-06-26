@@ -1,6 +1,7 @@
 from rest_framework.decorators import api_view
 from . serializer import *
 from . models import *
+from traffic.models import Accident
 from django.http import JsonResponse
 import bcrypt
 from django.contrib.auth.models import User
@@ -9,7 +10,6 @@ from rest_framework.permissions import AllowAny
 from rest_framework.decorators import authentication_classes, permission_classes
 from django.core.mail import send_mail
 from django.conf import settings
-
 
 @api_view(['POST'])
 @authentication_classes([])
@@ -25,6 +25,125 @@ def sendEmail(request):
     newserial = [{'status':"email successfuly sent"}] 
     return JsonResponse(newserial,safe=False) 
 
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([])
+def addhealthcontract(request):
+    p = Proposer.objects.get(id=request.data.get('proposerID'))
+    hc = HealthContract(contract_type = request.data.get('contractType'),contract_price = request.data.get('contractPrice'),
+                       contract_date = request.data.get('contractDate'),expire_date = request.data.get('expireDate'),proposer=p )
+    hc.save()
+    newserial = [{'status':"pass"}] 
+    return JsonResponse(newserial,safe=False) 
+
+
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([])
+def addhospital(request):
+    A = Admin.objects.get(id=request.data.get('adminID'))
+    h = Hospitals(name=request.data.get('name'),email=request.data.get('email'),
+                  phone=request.data.get('phone'),address=request.data.get('address'),admin=A)
+    h.save()
+    newserial = [{'status':"pass"}] 
+    return JsonResponse(newserial,safe=False)
+
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([])
+def approvecontract(request):
+    v = VehicleContract.objects.all().filter(id = request.data.get('id'))
+    if v:
+        va = VehicleContract.objects.get(id = request.data.get('id'))
+        va.is_approved = "True"
+        va.save()
+        newserial = [{'status':"pass"}] 
+        return JsonResponse(newserial,safe=False) 
+    else:
+        newserial = [{'status':"fail"}] 
+        return JsonResponse(newserial,safe=False) 
+
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([])
+def getproposeremail(request):
+    items = Proposer.objects.all().filter(id=request.data.get("proposerID"))
+    if items:
+        items = ResidentialAddress.objects.all().filter(proposer=request.data.get("proposerID"))
+        serializer = residential_serializer(items, many=True)
+        return JsonResponse(serializer.data[0]['email'],safe=False)
+    else:
+        newserial = [{'status':"fail"}] 
+        return JsonResponse(newserial,safe=False) 
+        
+
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([])
+def createbid(request):
+    veh=Vehicle.objects.get(id=request.data.get("vehicleID"))
+    vehic = Vehicle.objects.all().filter(id=request.data.get("vehicleID"))
+    if vehic:
+        b = Bid(vehicle=veh)
+        b.save()
+        items = request.data.get('items')
+        for i in items:
+            item = ItemsList(bid=b,item_name=i)
+            item.save()
+        newserial = [{'status':"pass"}] 
+        return JsonResponse(newserial,safe=False)
+    else:
+        newserial = [{'status':"fail, no vehicle found using the given vehicleID"}] 
+        return JsonResponse(newserial,safe=False)
+
+
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([])
+def creategaragebid(request):
+    b=Bid.objects.get(id=request.data.get("bidID"))
+    bb = Bid.objects.all().filter(id=request.data.get("bidID"))
+    g=Garage.objects.get(id=request.data.get("garageID"))
+    gg = Garage.objects.all().filter(id=request.data.get("garageID"))
+    if bb and gg:
+        gid=GarageBid(bid=b,garage=g)
+        gid.save()
+        igp = ItemGaragePrice(garage_bid = gid, item_name=request.data.get("item"),price=request.data.get("price"))
+        igp.save()
+        newserial = [{'status':"created"}] 
+        return JsonResponse(newserial,safe=False)
+    else:
+        newserial = [{'status':"fail"}] 
+        return JsonResponse(newserial,safe=False) 
+
+@api_view(['GET'])
+@authentication_classes([])
+@permission_classes([])
+def getbid(request):
+    b = Bid.objects.all()
+    bs = bid_serializer(b,many=True)
+    i = ItemsList.objects.all()
+    il = itemslist_serializer(i, many=True)
+    concatenated_data = []
+    concatenated_data.append(bs.data)
+    concatenated_data.append(il.data)
+    return JsonResponse(concatenated_data,safe=False)
+
+@api_view(['GET'])
+@authentication_classes([])
+@permission_classes([])
+def getgaragebid(request):
+    garagebidobjects = GarageBid.objects.all()
+    garagebidserializer = garagebid_serializer(garagebidobjects,many=True)
+    itemgarage_price_object = ItemGaragePrice.objects.all()
+    itemgarage_price_serializer = itemgarageprice_serializer(itemgarage_price_object,many=True)
+    bidobject = Bid.objects.all()
+    bidserializer = bid_serializer(bidobject,many=True)
+    concatenated_data = []
+    concatenated_data.append(garagebidserializer.data)
+    concatenated_data.append(itemgarage_price_serializer.data)
+    concatenated_data.append(bidserializer.data)
+    return JsonResponse(concatenated_data,safe=False)
 @api_view(['GET'])
 @authentication_classes([])
 @permission_classes([])
@@ -55,9 +174,9 @@ def getVehicles(request):
     concatenated_data.append(serializer3.data)
     concatenated_data.append(serializer4.data)
     concatenated_data.append(serializer5.data)
+    
     return JsonResponse(concatenated_data,safe=False)
-
-
+    
 @api_view(['GET'])
 @authentication_classes([])
 @permission_classes([])
@@ -101,72 +220,6 @@ def getclaimsbot(request):
     else:
         newserial = [] 
         return JsonResponse(newserial,safe=False)
-
-@api_view(['POST'])
-@authentication_classes([])
-@permission_classes([])
-def createbid(request):
-    veh=Vehicle.objects.get(id=request.data.get("vehicleID"))
-    vehic = Vehicle.objects.all().filter(id=request.data.get("vehicleID"))
-    if vehic:
-        b = Bid(vehicle=veh)
-        b.save()
-        items = request.data.get('items')
-        for i in items:
-            item = ItemsList(bid=b,item_name=i)
-            item.save()
-        newserial = [{'status':"pass"}] 
-        return JsonResponse(newserial,safe=False)
-    else:
-        newserial = [{'status':"fail, no vehicle found using the given vehicleID"}] 
-        return JsonResponse(newserial,safe=False)
-
-@api_view(['GET'])
-@authentication_classes([])
-@permission_classes([])
-def getbid(request):
-    b = Bid.objects.all()
-    bs = bid_serializer(b,many=True)
-    i = ItemsList.objects.all()
-    il = itemslist_serializer(i, many=True)
-    concatenated_data = []
-    concatenated_data.append(bs.data)
-    concatenated_data.append(il.data)
-    return JsonResponse(concatenated_data,safe=False)
-
-@api_view(['GET'])
-@authentication_classes([])
-@permission_classes([])
-def getgaragebid(request):
-    garagebidobjects = GarageBid.objects.all()
-    garagebidserializer = garagebid_serializer(garagebidobjects,many=True)
-    itemgarage_price_object = ItemGaragePrice.objects.all()
-    itemgarage_price_serializer = itemgarageprice_serializer(itemgarage_price_object,many=True)
-    bidobject = Bid.objects.all()
-    bidserializer = bid_serializer(bidobject,many=True)
-    concatenated_data = []
-    concatenated_data.append(garagebidserializer.data)
-    concatenated_data.append(itemgarage_price_serializer.data)
-    concatenated_data.append(bidserializer.data)
-    return JsonResponse(concatenated_data,safe=False)
-@api_view(['POST'])
-@authentication_classes([])
-@permission_classes([])
-def creategaragebid(request):
-    b=Bid.objects.get(id=request.data.get("bidID"))
-    bb = Bid.objects.all().filter(id=request.data.get("bidID"))
-    g=Garage.objects.get(id=request.data.get("garageID"))
-    gg = Garage.objects.all().filter(id=request.data.get("garageID"))
-    if bb and gg:
-        gid=GarageBid(bid=b,garage=g)
-        gid.save()
-        igp = ItemGaragePrice(garage_bid = gid, item_name=request.data.get("item"),price=request.data.get("price"))
-        igp.save()
-        newserial = [{'status':"created"}] 
-        return JsonResponse(newserial,safe=False)
-    else:
-        newserial = [{'status':"fail"}] 
-        return JsonResponse(newserial,safe=False) 
 
 
 @api_view(['GET'])
@@ -227,15 +280,23 @@ def addClaim(request):
         newserial = [{'status':"fail",'reason':"claim with the accident id already submitted"}]
         return JsonResponse(newserial,safe=False)
     else:
-        claimobject = Claim(date=request.data.get('date'),accident_id = request.data.get('accident_id'),
-        total_price=request.data.get('totalPrice'),closed_date=request.data.get('closedDate'),
-        progress=request.data.get('progress'),proposer=prop,garage=gar,vehicle=veh)
-        claimobject.save()
-        newserial = [{'status':"created"}] 
-        return JsonResponse(newserial,safe=False) 
+        A = Accident.objects.all().filter(id = request.data.get('accident_id'))
+        if A:
+            claimobject = Claim(date=request.data.get('date'),accident_id = request.data.get('accident_id'),
+            total_price=request.data.get('totalPrice'),closed_date=request.data.get('closedDate'),
+            progress=request.data.get('progress'),proposer=prop,garage=gar,vehicle=veh)
+            claimobject.save()
+            newserial = [{'status':"created"}] 
+            return JsonResponse(newserial,safe=False) 
+        else:
+            newserial = [{'status':"fail",'reason':"accident id not found"}]
+            return JsonResponse(newserial,safe=False)
+            
     
     
 @api_view(['POST'])
+@authentication_classes([])
+@permission_classes([])
 def createVehicleInsurance(request):
     expert = Expert.objects.get(id=request.data.get('expertId'))
     proposer = Proposer.objects.get(id = request.data.get('proposerId'))
@@ -270,6 +331,8 @@ def createVehicleInsurance(request):
         pa.save()
     newserial = [{'status':"created"}] 
     return JsonResponse(newserial,safe=False) 
+
+
 @api_view(['POST']) 
 def Login(request):
     usr = request.data.get("username")
@@ -286,8 +349,8 @@ def Login(request):
                 if serializer.is_valid:
                     
                     newserial[0]['status']="pass"
-                    newserial[0]['accounttype']="admin"
-                    newsrial[0]['adminID']=a.id            
+                    newserial[0]['accounttype']="admin" 
+                    newserial[0]['adminID']=a.id            
                     return JsonResponse(newserial, safe=False)
             
             else:
@@ -302,8 +365,8 @@ def Login(request):
             if bcrypt.checkpw(pw,e.password.encode('utf-8')):
                 if serializer.is_valid:
                     newserial[0]['status']="pass"
-                    newserial[0]['accounttype']="expert"   
-                    newsrial[0]['expertID']=e.id                       
+                    newserial[0]['accounttype']="expert" 
+                    newserial[0]['expertID']=e.id            
                     return JsonResponse(newserial, safe=False)
             
             else:
@@ -318,7 +381,7 @@ def Login(request):
             if bcrypt.checkpw(pw,p.password.encode('utf-8')):
                 if serializer.is_valid:
                     newserial[0]['status']="pass"
-                    newserial[0]['accounttype']="proposer"               
+                    newserial[0]['accounttype']="proposer"   
                     newserial[0]['proposerID']=p.id           
                     return JsonResponse(newserial, safe=False)
             
@@ -334,8 +397,8 @@ def Login(request):
             if bcrypt.checkpw(pw,g.password.encode('utf-8')):
                 if serializer.is_valid:
                     newserial[0]['status']="pass"
-                    newserial[0]['accounttype']="garage"   
-                    newsrial[0]['garageID']=g.id                      
+                    newserial[0]['accounttype']="garage"  
+                    newserial[0]['garageID']=g.id            
                     return JsonResponse(newserial, safe=False)
             
             else:
@@ -413,13 +476,17 @@ def createProposerAccount(request):
                                      password=request.data.get('password'),
                                      is_active=True,is_staff=False)
         u.save()
-        res_address = ResidentialAddress(account.id,subcity=request.data.get('res_subcity'),
-                                            woreda='res_woreda', kebele='res_kebele', house_no='res_house_no',
-                                            p_o_box='res_p_o_box', phone='res_phone', email='res_email')
-        bus_address = BusinessAddress(account.id,subcity=request.data.get('bus_subcity'),
-                                            woreda='bus_woreda', kebele='bus_kebele', house_no='bus_house_no',
-                                            p_o_box='bus_p_o_box', phone='bus_phone', email='bus_email',
-                                            fax='bus_fax')
+        res_address = ResidentialAddress(proposer = account,subcity=request.data.get('res_subcity'),
+                                            woreda=request.data.get('res_woreda'), kebele=request.data.get('res_kebele')
+                                            , house_no=request.data.get('res_house_no'),
+                                            p_o_box=request.data.get('res_p_o_box'), phone=request.data.get('res_phone')
+                                            , email=request.data.get('res_email'))
+        bus_address = BusinessAddress(proposer = account,subcity=request.data.get('bus_subcity'),
+                                            woreda=request.data.get('bus_woreda'), kebele=request.data.get('bus_kebele')
+                                            , house_no=request.data.get('bus_house_no'),
+                                            p_o_box=request.data.get('bus_p_o_box'), phone=request.data.get('bus_phone'),
+                                            email=request.data.get('bus_email'),
+                                            fax=request.data.get('bus_fax'))
         res_address.save()
         bus_address.save()
         newserial = [{'status':"created"}] 
